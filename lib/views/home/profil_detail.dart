@@ -84,6 +84,44 @@ class _ProfilDetailState extends State<ProfilDetail> {
     context.pushReplacement(LoginPage());
   }
 
+  void _showLogoutDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          title: const Text(
+            "Konfirmasi",
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          content: const Text("Apakah Anda yakin ingin logout?"),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context), // tutup dialog
+              child: const Text("Batal"),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context); // tutup dialog
+                _logout(); // panggil fungsi logout
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: const Text("Logout"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = userData?.data;
@@ -246,7 +284,7 @@ class _ProfilDetailState extends State<ProfilDetail> {
                       child: SizedBox(
                         width: double.infinity,
                         child: ElevatedButton.icon(
-                          onPressed: _logout,
+                          onPressed: _showLogoutDialog,
                           icon: const Icon(Icons.logout, color: Colors.red),
                           label: const Text(
                             "Logout",
