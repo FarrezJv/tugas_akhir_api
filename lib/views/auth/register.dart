@@ -1,7 +1,13 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:tugas_akhir_api/api/register_user.dart';
 import 'package:tugas_akhir_api/extension/navigator.dart';
+import 'package:tugas_akhir_api/model/list_batch_model.dart';
+import 'package:tugas_akhir_api/model/list_training_model.dart';
+import 'package:tugas_akhir_api/model/register_model.dart';
+import 'package:tugas_akhir_api/preference/preference.dart';
 import 'package:tugas_akhir_api/views/auth/login.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -13,30 +19,111 @@ class RegisterPage extends StatefulWidget {
 
 class _RegisterPageState extends State<RegisterPage> {
   bool hidePassword = true;
+  bool isLoading = false;
+  String? errorMessage;
+  RegisterUserModel? user;
 
   String? selectedGender;
-  String? selectedBatch;
-  String? selectedTraining;
+  batches? selectedBatch;
+  Datum? selectedTraining; // dari ListTrainingModel
 
-  File? selectedImage;
+  final ImagePicker _picker = ImagePicker();
+  XFile? pickedFile;
 
-  final List<String> genderList = ['Laki-laki', 'Perempuan'];
-  final List<String> batchList = ['Batch 1', 'Batch 2', 'Batch 3'];
-  final List<String> trainingList = [
-    'Data Management Staff',
-    'Desain Grafis',
-    'Web Developer',
-  ];
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passController = TextEditingController();
 
-  // Future<void> _pickImage() async {
-  //   final picker = ImagePicker();
-  //   final picked = await picker.pickImage(source: ImageSource.gallery);
-  //   if (picked != null) {
-  //     setState(() {
-  //       selectedImage = File(picked.path);
-  //     });
-  //   }
-  // }
+  List<String> genderList = ["L", "P"];
+  List<batches> batchList = [];
+  List<Datum> trainingList = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchDropdownData();
+  }
+
+  Future<void> fetchDropdownData() async {
+    try {
+      final batchResponse = await AuthenticationAPI.getAllBatches();
+      final trainingResponse = await AuthenticationAPI.getAllTrainings();
+      setState(() {
+        batchList = batchResponse.data ?? [];
+        trainingList = trainingResponse.data ?? [];
+      });
+    } catch (e) {
+      print("Error fetch dropdown: $e");
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Gagal load data dropdown: $e")));
+    }
+  }
+
+  Future<void> pickFoto() async {
+    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    setState(() {
+      pickedFile = image;
+    });
+  }
+
+  Future<void> registerUser() async {
+    final name = nameController.text.trim();
+    final email = emailController.text.trim();
+    final pass = passController.text.trim();
+
+    if (name.isEmpty || email.isEmpty || pass.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Semua field wajib diisi")));
+      return;
+    }
+    PreferenceHandler.saveToken(user?.data?.token.toString() ?? "");
+
+    if (selectedGender == null ||
+        selectedBatch == null ||
+        selectedTraining == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Pilih gender, batch, dan training")),
+      );
+      return;
+    }
+    if (pickedFile == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Foto profil belum dipilih")),
+      );
+      return;
+    }
+
+    setState(() {
+      isLoading = true;
+      errorMessage = null;
+    });
+
+    try {
+      RegisterUserModel result = await AuthenticationAPI.registerUser(
+        name: name,
+        email: email,
+        password: pass,
+        jenisKelamin: selectedGender!,
+        profilePhoto: File(pickedFile!.path),
+        batchId: selectedBatch!.id!,
+        trainingId: selectedTraining!.id!,
+      );
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(result.message ?? "Register berhasil")),
+      );
+      context.push(const LoginPage());
+    } catch (e) {
+      setState(() => errorMessage = e.toString());
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Gagal daftar: $errorMessage")));
+    } finally {
+      setState(() => isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,159 +144,119 @@ class _RegisterPageState extends State<RegisterPage> {
                   color: Color(0xFF2F57E4),
                 ),
               ),
-              const SizedBox(height: 8),
-              const Text(
-                "Daftar sekarang untuk mendapatkan pengalaman terbaik.",
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.grey, fontSize: 14),
-              ),
               const SizedBox(height: 24),
 
-              // Foto Profil
-              GestureDetector(
-                // onTap: _pickImage,
-                child: CircleAvatar(
-                  radius: 50,
-                  backgroundColor: Colors.grey[200],
-                  backgroundImage: selectedImage != null
-                      ? FileImage(selectedImage!)
-                      : null,
-                  child: selectedImage == null
-                      ? const Icon(
-                          Icons.camera_alt,
-                          size: 40,
-                          color: Colors.grey,
-                        )
-                      : null,
-                ),
-              ),
+              /// Foto Profil
+              pickedFile != null
+                  ? CircleAvatar(
+                      radius: 50,
+                      backgroundImage: FileImage(File(pickedFile!.path)),
+                    )
+                  : CircleAvatar(
+                      radius: 50,
+                      backgroundColor: Colors.grey[200],
+                      child: const Icon(
+                        Icons.person,
+                        size: 50,
+                        color: Colors.grey,
+                      ),
+                    ),
               const SizedBox(height: 10),
-              const Text(
-                "Ketuk untuk pilih foto profil",
-                style: TextStyle(color: Colors.grey),
+              OutlinedButton.icon(
+                onPressed: pickFoto,
+                icon: const Icon(Icons.camera_alt, color: Color(0xFF2F57E4)),
+                label: const Text(
+                  "Pilih Foto Profil",
+                  style: TextStyle(color: Color(0xFF2F57E4)),
+                ),
               ),
               const SizedBox(height: 32),
 
-              // Nama
+              /// Nama
               TextField(
-                decoration: InputDecoration(
-                  hintText: "Masukkan Nama",
-                  filled: true,
-                  fillColor: Colors.grey[100],
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide.none,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
+                controller: nameController,
+                decoration: _inputDecoration("Masukkan Nama"),
               ),
               const SizedBox(height: 16),
 
-              // Email
+              /// Email
               TextField(
-                decoration: InputDecoration(
-                  hintText: "Masukkan Email",
-                  filled: true,
-                  fillColor: Colors.grey[100],
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide.none,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
+                controller: emailController,
+                decoration: _inputDecoration("Masukkan Email"),
               ),
               const SizedBox(height: 16),
 
-              // Password
+              /// Password
               TextField(
+                controller: passController,
                 obscureText: hidePassword,
-                decoration: InputDecoration(
-                  hintText: "Masukkan Password",
-                  filled: true,
-                  fillColor: Colors.grey[100],
+                decoration: _inputDecoration("Masukkan Password").copyWith(
                   suffixIcon: IconButton(
                     icon: Icon(
                       hidePassword ? Icons.visibility_off : Icons.visibility,
                       color: Colors.grey,
                     ),
-                    onPressed: () {
-                      setState(() {
-                        hidePassword = !hidePassword;
-                      });
-                    },
-                  ),
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide.none,
-                    borderRadius: BorderRadius.circular(12),
+                    onPressed: () =>
+                        setState(() => hidePassword = !hidePassword),
                   ),
                 ),
               ),
               const SizedBox(height: 16),
 
-              // Jenis Kelamin
+              /// Gender
               DropdownButtonFormField<String>(
                 value: selectedGender,
                 items: genderList
                     .map((g) => DropdownMenuItem(value: g, child: Text(g)))
                     .toList(),
-                onChanged: (val) {
-                  setState(() => selectedGender = val);
-                },
-                decoration: InputDecoration(
-                  hintText: 'Pilih Jenis Kelamin',
-                  filled: true,
-                  fillColor: Colors.grey[100],
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide.none,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
+                onChanged: (val) => setState(() => selectedGender = val),
+                decoration: _inputDecoration("Pilih Jenis Kelamin"),
               ),
               const SizedBox(height: 16),
 
-              // Batch
-              DropdownButtonFormField<String>(
+              /// Batch (from API)
+              DropdownButtonFormField<batches>(
                 value: selectedBatch,
                 items: batchList
-                    .map((b) => DropdownMenuItem(value: b, child: Text(b)))
+                    .map(
+                      (b) => DropdownMenuItem(
+                        value: b,
+                        child: Text(b.batchKe ?? "Batch ${b.id}"),
+                      ),
+                    )
                     .toList(),
-                onChanged: (val) {
-                  setState(() => selectedBatch = val);
-                },
-                decoration: InputDecoration(
-                  hintText: 'Pilih Batch',
-                  filled: true,
-                  fillColor: Colors.grey[100],
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide.none,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
+                onChanged: (val) => setState(() => selectedBatch = val),
+                decoration: _inputDecoration("Pilih Batch"),
               ),
               const SizedBox(height: 16),
 
-              // Training
-              DropdownButtonFormField<String>(
+              /// Training (from API)
+              DropdownButtonFormField<Datum>(
                 value: selectedTraining,
                 items: trainingList
-                    .map((t) => DropdownMenuItem(value: t, child: Text(t)))
+                    .map(
+                      (t) => DropdownMenuItem(
+                        value: t,
+                        child: SizedBox(
+                          width: 220, // atur sesuai kebutuhan
+                          child: Text(
+                            t.title ?? "Pelatihan ${t.id}",
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                        ),
+                      ),
+                    )
                     .toList(),
-                onChanged: (val) {
-                  setState(() => selectedTraining = val);
-                },
-                decoration: InputDecoration(
-                  hintText: 'Pilih Pelatihan',
-                  filled: true,
-                  fillColor: Colors.grey[100],
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide.none,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
+                onChanged: (val) => setState(() => selectedTraining = val),
+                decoration: _inputDecoration("Pilih Pelatihan"),
               ),
+
               const SizedBox(height: 32),
 
-              // Tombol Daftar
+              /// Tombol Daftar
               ElevatedButton(
-                onPressed: () {},
+                onPressed: isLoading ? null : registerUser,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF2F57E4),
                   minimumSize: const Size(double.infinity, 50),
@@ -217,23 +264,25 @@ class _RegisterPageState extends State<RegisterPage> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: const Text(
-                  "Buat Akun",
-                  style: TextStyle(fontSize: 16, color: Colors.white),
-                ),
+                child: isLoading
+                    ? const CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      )
+                    : const Text(
+                        "Buat Akun",
+                        style: TextStyle(fontSize: 16, color: Colors.white),
+                      ),
               ),
               const SizedBox(height: 16),
 
-              // Punya Akun?
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Text("Sudah punya akun?"),
                   const SizedBox(width: 6),
                   GestureDetector(
-                    onTap: () {
-                      context.push(LoginPage());
-                    },
+                    onTap: () => context.push(const LoginPage()),
                     child: const Text(
                       "Masuk",
                       style: TextStyle(
@@ -244,10 +293,21 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                 ],
               ),
-              const SizedBox(height: 30),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  InputDecoration _inputDecoration(String hint) {
+    return InputDecoration(
+      hintText: hint,
+      filled: true,
+      fillColor: Colors.grey[100],
+      border: OutlineInputBorder(
+        borderSide: BorderSide.none,
+        borderRadius: BorderRadius.circular(12),
       ),
     );
   }

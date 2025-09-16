@@ -6,15 +6,15 @@ import 'package:tugas_akhir_api/utils/splash_screen.dart';
 import 'package:tugas_akhir_api/views/auth/login.dart';
 import 'package:tugas_akhir_api/views/home/botnav.dart';
 
-class Day16SplashScreen extends StatefulWidget {
-  const Day16SplashScreen({super.key});
+class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
   static const id = "/splash_screen";
 
   @override
-  State<Day16SplashScreen> createState() => _Day16SplashScreenState();
+  State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _Day16SplashScreenState extends State<Day16SplashScreen> {
+class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();

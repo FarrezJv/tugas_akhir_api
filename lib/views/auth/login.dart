@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:tugas_akhir_api/api/register_user.dart';
 import 'package:tugas_akhir_api/extension/navigator.dart';
+import 'package:tugas_akhir_api/model/register_model.dart';
+import 'package:tugas_akhir_api/preference/preference.dart';
 import 'package:tugas_akhir_api/views/auth/register.dart';
+import 'package:tugas_akhir_api/views/home/botnav.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -10,7 +14,68 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  bool rememberMe = false;
+  bool isVisibility = false;
   bool _obscurePassword = true;
+  bool isLoading = false;
+
+  RegisterUserModel? user;
+  String? errorMessage;
+
+  void loginUser() async {
+    setState(() {
+      isLoading = true;
+      errorMessage = null;
+    });
+    final email = emailController.text.trim();
+    final password = passwordController.text.trim();
+    // final name = nameController.text.trim();
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Email, Password, dan Nama tidak boleh kosong"),
+        ),
+      );
+      isLoading = false;
+
+      return;
+    }
+    try {
+      final result = await AuthenticationAPI.loginUser(
+        email: email,
+        password: password,
+        // name: name,
+      );
+      setState(() {
+        user = result;
+      });
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Login berhasil")));
+      PreferenceHandler.saveToken(user?.data?.token.toString() ?? "");
+      final savedUserId = await PreferenceHandler.getUserId();
+      print("Saved User Id: $savedUserId");
+      // Navigator.pushReplacementNamed(Dashboard1.id);
+      context.pushReplacement(BotnavPage());
+
+      print(user?.toJson());
+    } catch (e) {
+      print(e);
+      setState(() {
+        errorMessage = e.toString();
+      });
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(errorMessage.toString())));
+    } finally {
+      setState(() {});
+      isLoading = false;
+    }
+    // context.pushReplacementNamed(Dashboard1.id);
+  }
+  // bool _obscurePassword = true;
 
   @override
   Widget build(BuildContext context) {
@@ -48,6 +113,7 @@ class _LoginPageState extends State<LoginPage> {
 
               // ===================== EMAIL =====================
               TextField(
+                controller: emailController,
                 decoration: InputDecoration(
                   hintText: 'Masukkan Email',
                   filled: true,
@@ -62,6 +128,7 @@ class _LoginPageState extends State<LoginPage> {
 
               // ===================== PASSWORD =====================
               TextField(
+                controller: passwordController,
                 obscureText: _obscurePassword,
                 decoration: InputDecoration(
                   hintText: 'Masukkan Password',
@@ -103,7 +170,9 @@ class _LoginPageState extends State<LoginPage> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    loginUser();
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0xFF2F57E4),
                     padding: const EdgeInsets.symmetric(vertical: 14),
