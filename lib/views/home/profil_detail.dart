@@ -4,6 +4,7 @@ import 'package:tugas_akhir_api/extension/navigator.dart';
 import 'package:tugas_akhir_api/model/get_user_model.dart';
 import 'package:tugas_akhir_api/preference/preference.dart';
 import 'package:tugas_akhir_api/views/auth/login.dart';
+import 'package:tugas_akhir_api/views/home/edit_profile.dart';
 
 class ProfilDetail extends StatefulWidget {
   const ProfilDetail({super.key});
@@ -81,7 +82,7 @@ class _ProfilDetailState extends State<ProfilDetail> {
     PreferenceHandler.removeUserId();
     PreferenceHandler.removeToken();
     PreferenceHandler.removeLogin();
-    context.pushReplacement(LoginPage());
+    context.pushReplacement(const LoginPage());
   }
 
   void _showLogoutDialog() {
@@ -99,13 +100,13 @@ class _ProfilDetailState extends State<ProfilDetail> {
           content: const Text("Apakah Anda yakin ingin logout?"),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context), // tutup dialog
+              onPressed: () => Navigator.pop(context),
               child: const Text("Batal"),
             ),
             ElevatedButton(
               onPressed: () {
-                Navigator.pop(context); // tutup dialog
-                _logout(); // panggil fungsi logout
+                Navigator.pop(context);
+                _logout();
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,
@@ -153,31 +154,66 @@ class _ProfilDetailState extends State<ProfilDetail> {
                         children: [
                           // Tombol Back
                           IconButton(
-                            onPressed: () => Navigator.pop(context),
+                            onPressed: () => Navigator.pop(context, userData),
                             icon: const Icon(
                               Icons.arrow_back,
                               color: Colors.white,
                             ),
                           ),
                           const SizedBox(width: 8),
-                          CircleAvatar(
-                            radius: 30,
-                            backgroundColor: Colors.white,
-                            backgroundImage:
-                                (user?.profilePhotoUrl != null &&
-                                    user!.profilePhotoUrl!.isNotEmpty)
-                                ? NetworkImage(user.profilePhotoUrl!)
-                                : null,
-                            child:
-                                (user?.profilePhotoUrl == null ||
-                                    user!.profilePhotoUrl!.isEmpty)
-                                ? const Icon(
-                                    Icons.person,
-                                    size: 40,
-                                    color: Colors.blue,
-                                  )
-                                : null,
+
+                          Stack(
+                            children: [
+                              CircleAvatar(
+                                radius: 30,
+                                backgroundColor: Colors.white,
+                                backgroundImage:
+                                    (user?.profilePhotoUrl != null &&
+                                        user!.profilePhotoUrl!.isNotEmpty)
+                                    ? NetworkImage(user.profilePhotoUrl!)
+                                    : null,
+                                child:
+                                    (user?.profilePhotoUrl == null ||
+                                        user!.profilePhotoUrl!.isEmpty)
+                                    ? const Icon(
+                                        Icons.person,
+                                        size: 30,
+                                        color: Colors.blue,
+                                      )
+                                    : null,
+                              ),
+                              Positioned(
+                                bottom: 0,
+                                right: 0,
+                                child: InkWell(
+                                  onTap: () async {
+                                    final updated = await context.push(
+                                      EditProfileScreen(
+                                        imageURL: user?.profilePhotoUrl ?? "",
+                                        name: user?.name ?? "",
+                                      ),
+                                    );
+                                    if (updated != null) {
+                                      await _loadProfileData();
+                                    }
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.all(4),
+                                    decoration: const BoxDecoration(
+                                      color: Colors.white,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      Icons.edit,
+                                      size: 16,
+                                      color: Colors.blue,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
+
                           const SizedBox(width: 16),
                           Expanded(
                             child: Column(
@@ -201,8 +237,6 @@ class _ProfilDetailState extends State<ProfilDetail> {
                               ],
                             ),
                           ),
-
-                          // Logout tombol kecil (opsional)
                         ],
                       ),
                     ),
@@ -263,14 +297,6 @@ class _ProfilDetailState extends State<ProfilDetail> {
                               user?.trainingTitle ?? "",
                               icon: Icons.school,
                             ),
-                            _buildInfoRow(
-                              "Periode",
-                              (user?.batch?.startDate != null &&
-                                      user?.batch?.endDate != null)
-                                  ? "${user!.batch!.startDate!.toLocal().toString().split(' ')[0]} - ${user.batch!.endDate!.toLocal().toString().split(' ')[0]}"
-                                  : "-",
-                              icon: Icons.date_range,
-                            ),
                           ],
                         ),
                       ),
@@ -278,7 +304,7 @@ class _ProfilDetailState extends State<ProfilDetail> {
 
                     const SizedBox(height: 20),
 
-                    // Tombol Logout di bawah card
+                    // Tombol Logout
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: SizedBox(
@@ -295,9 +321,7 @@ class _ProfilDetailState extends State<ProfilDetail> {
                           ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.white,
-                            shadowColor: Colors.red.withOpacity(
-                              0.3,
-                            ), // efek terang
+                            shadowColor: Colors.red.withOpacity(0.3),
                             elevation: 6,
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             shape: RoundedRectangleBorder(
@@ -305,7 +329,7 @@ class _ProfilDetailState extends State<ProfilDetail> {
                               side: const BorderSide(
                                 color: Colors.red,
                                 width: 1,
-                              ), // outline tipis
+                              ),
                             ),
                           ),
                         ),

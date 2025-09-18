@@ -1,7 +1,7 @@
 import 'package:animated_notch_bottom_bar/animated_notch_bottom_bar/animated_notch_bottom_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:tugas_akhir_api/check.dart';
-import 'package:tugas_akhir_api/views/home/halman_utama.dart';
+import 'package:tugas_akhir_api/views/home/halaman_utama.dart';
 import 'package:tugas_akhir_api/views/home/test.dart';
 
 class BotnavPage extends StatefulWidget {
@@ -24,7 +24,7 @@ class _BotnavPageState extends State<BotnavPage> {
   static const List<Widget> _widgetOptions = <Widget>[
     HalamanPage(),
     AbsensiApp(),
-    TESTEST(),
+    GoogleMapsScreen(),
   ];
 
   /// Item menu untuk bottom navigation
@@ -49,6 +49,7 @@ class _BotnavPageState extends State<BotnavPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFFFFFFFF),
       body: Center(child: _widgetOptions[_selectedIndex]),
       bottomNavigationBar: AnimatedNotchBottomBar(
         notchBottomBarController: _controller,

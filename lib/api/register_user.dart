@@ -114,25 +114,45 @@ class AuthenticationAPI {
     }
   }
 
-  // static Future<GetUserModel> updateUser({required String name}) async {
-  //   final url = Uri.parse(Endpoint.profile);
-  //   final token = await PreferenceHandler.getToken();
-  //   final response = await http.put(
-  //     url,
-  //     body: {"name": name},
-  //     headers: {
-  //       "Accept": "application/json",
-  //       // "Content-Type": "application/json",
-  //       "Authorization": "Bearer $token",
-  //     },
-  //   );
-  //   if (response.statusCode == 200) {
-  //     return GetUserModel.fromJson(json.decode(response.body));
-  //   } else {
-  //     final error = json.decode(response.body);
-  //     throw Exception(error["message"] ?? "Register gagal");
-  //   }
-  // }
+  static Future<GetUserModel> updateUser({required String name}) async {
+    final url = Uri.parse(Endpoint.profile);
+    final token = await PreferenceHandler.getToken();
+    final response = await http.put(
+      url,
+      body: {"name": name},
+      headers: {
+        "Accept": "application/json",
+        // "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
+    );
+    if (response.statusCode == 200) {
+      return GetUserModel.fromJson(json.decode(response.body));
+    } else {
+      final error = json.decode(response.body);
+      throw Exception(error["message"] ?? "Register gagal");
+    }
+  }
+
+  static Future<GetUserModel> updateProfile({required String name}) async {
+    final url = Uri.parse(Endpoint.updateProfile);
+    final token = await PreferenceHandler.getToken();
+    final response = await http.put(
+      url,
+      body: {"name": name},
+      headers: {
+        "Accept": "application/json",
+        // "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
+    );
+    if (response.statusCode == 200) {
+      return GetUserModel.fromJson(json.decode(response.body));
+    } else {
+      final error = json.decode(response.body);
+      throw Exception(error["message"] ?? "Register gagal");
+    }
+  }
 
   static Future<GetUserModel> getProfile() async {
     final url = Uri.parse(Endpoint.profile);

@@ -73,7 +73,6 @@ class _LoginPageState extends State<LoginPage> {
       setState(() {});
       isLoading = false;
     }
-    // context.pushReplacementNamed(Dashboard1.id);
   }
   // bool _obscurePassword = true;
 

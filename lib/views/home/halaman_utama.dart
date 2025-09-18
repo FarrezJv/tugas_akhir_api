@@ -1,6 +1,15 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:intl/intl.dart';
+import 'package:tugas_akhir_api/api/checkin.dart';
 import 'package:tugas_akhir_api/api/register_user.dart';
+import 'package:tugas_akhir_api/check.dart';
 import 'package:tugas_akhir_api/extension/navigator.dart';
+import 'package:tugas_akhir_api/model/absen_today_model.dart';
+import 'package:tugas_akhir_api/model/checkout.dart';
 import 'package:tugas_akhir_api/model/get_user_model.dart';
 import 'package:tugas_akhir_api/views/home/profil_detail.dart';
 
@@ -15,13 +24,43 @@ class HalamanPage extends StatefulWidget {
 
 class _HalamanPageState extends State<HalamanPage> {
   GetUserModel? userData;
+  AbsenTodayModel? absenToday;
+
   bool isLoading = true;
   String? errorMessage;
+
+  // === real-time clock ===
+  late String _currentTime;
+  late String _currentDate;
+  Timer? _timer;
 
   @override
   void initState() {
     super.initState();
     _loadProfileData();
+    _loadAbsenToday();
+
+    // set awal
+    _updateTime();
+
+    // update setiap 1 detik
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      _updateTime();
+    });
+  }
+
+  void _updateTime() {
+    final now = DateTime.now();
+    setState(() {
+      _currentTime = DateFormat("HH:mm:ss").format(now);
+      _currentDate = DateFormat("EEE, dd MMM yyyy", "id_ID").format(now);
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
   }
 
   Future<void> _loadProfileData() async {
@@ -36,6 +75,63 @@ class _HalamanPageState extends State<HalamanPage> {
         errorMessage = e.toString();
         isLoading = false;
       });
+    }
+  }
+
+  Future<void> _loadAbsenToday() async {
+    try {
+      final data = await AbsenAPI.getAbsenToday();
+      setState(() {
+        absenToday = data;
+      });
+    } catch (e) {
+      print("Error load absen today: $e");
+    }
+  }
+
+  Future<void> _absenCheckOut() async {
+    try {
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
+
+      String address = "Alamat tidak ditemukan";
+      String locationName = "Lokasi Tidak Diketahui";
+      if (placemarks.isNotEmpty) {
+        final place = placemarks.first;
+        address =
+            "${place.street}, ${place.subLocality}, ${place.locality}, ${place.administrativeArea}, ${place.country}";
+        locationName = place.locality ?? "Lokasi Tidak Diketahui";
+      }
+
+      CheckOutModel? result = await AbsenAPI.checkOut(
+        checkOutLat: position.latitude,
+        checkOutLng: position.longitude,
+        checkOutLocation: locationName,
+        checkOutAddress: address,
+      );
+
+      if (!mounted) return;
+
+      if (result != null) {
+        await _loadAbsenToday();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Check-out berhasil: ${result.message}")),
+        );
+      } else {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text("Check-out gagal")));
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error: $e")));
     }
   }
 
@@ -147,29 +243,29 @@ class _HalamanPageState extends State<HalamanPage> {
                               style: TextStyle(color: Colors.grey),
                             ),
                             const SizedBox(height: 4),
-                            const Text(
-                              "08:34 AM",
-                              style: TextStyle(
+                            Text(
+                              _currentTime, // jam real-time
+                              style: const TextStyle(
                                 fontSize: 36,
                                 color: Color(0xFF3B82F6),
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                             const SizedBox(height: 4),
-                            const Text(
-                              "Jum, 14 April 2023",
-                              style: TextStyle(color: Colors.grey),
+                            Text(
+                              _currentDate, // tanggal real-time
+                              style: const TextStyle(color: Colors.grey),
                             ),
                             const SizedBox(height: 16),
                             const Divider(),
                             const SizedBox(height: 16),
                             const Text(
-                              "Jam Kerja",
+                              "Jam Pelatihan",
                               style: TextStyle(color: Colors.grey),
                             ),
                             const SizedBox(height: 4),
                             const Text(
-                              "08:00 - 17:00",
+                              "08:00 - 15:00",
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
@@ -180,7 +276,9 @@ class _HalamanPageState extends State<HalamanPage> {
                               children: [
                                 Expanded(
                                   child: ElevatedButton(
-                                    onPressed: () {},
+                                    onPressed: () {
+                                      context.push(AbsensiApp());
+                                    },
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: const Color(0xFF3B82F6),
                                       padding: const EdgeInsets.symmetric(
@@ -202,7 +300,7 @@ class _HalamanPageState extends State<HalamanPage> {
                                 const SizedBox(width: 16),
                                 Expanded(
                                   child: ElevatedButton(
-                                    onPressed: () {},
+                                    onPressed: _absenCheckOut,
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: const Color(0xFF3B82F6),
                                       padding: const EdgeInsets.symmetric(
@@ -245,7 +343,7 @@ class _HalamanPageState extends State<HalamanPage> {
                               ),
                               SizedBox(width: 8),
                               Text(
-                                "Riwayat Absensi",
+                                "Riwayat Absensi Hari Ini",
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
@@ -254,22 +352,18 @@ class _HalamanPageState extends State<HalamanPage> {
                             ],
                           ),
                           const SizedBox(height: 12),
-                          ...[
-                            ["Jum, 14 April 2023", "08:00 - 17:00", false],
-                            ["Kam, 13 April 2023", "08:45 - 17:00", true],
-                            ["Rab, 12 April 2023", "07:55 - 17:00", false],
-                            ["Sel, 11 April 2023", "07:58 - 17:00", false],
-                            ["Sen, 10 April 2023", "08:15 - 17:00", true],
-                            ["Min, 9 April 2023", "08:00 - 17:00", false],
-                          ].map((item) {
-                            return Padding(
+                          if (absenToday?.data != null)
+                            Padding(
                               padding: const EdgeInsets.symmetric(vertical: 10),
                               child: Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
-                                    item[0] as String,
+                                    DateFormat(
+                                      "EEE, dd MMM yyyy",
+                                      "id_ID",
+                                    ).format(absenToday!.data!.attendanceDate!),
                                     style: const TextStyle(
                                       color: Colors.black87,
                                     ),
@@ -283,10 +377,12 @@ class _HalamanPageState extends State<HalamanPage> {
                                       ),
                                       const SizedBox(width: 4),
                                       Text(
-                                        item[1] as String,
+                                        "${absenToday!.data!.checkInTime ?? '-'} - ${absenToday!.data!.checkOutTime ?? '-'}",
                                         style: TextStyle(
                                           fontWeight: FontWeight.w500,
-                                          color: (item[2] as bool)
+                                          color:
+                                              absenToday!.data!.status ==
+                                                  "Terlambat"
                                               ? Colors.red
                                               : Colors.black87,
                                         ),
@@ -295,8 +391,12 @@ class _HalamanPageState extends State<HalamanPage> {
                                   ),
                                 ],
                               ),
-                            );
-                          }),
+                            )
+                          else
+                            const Text(
+                              "Belum ada absensi hari ini",
+                              style: TextStyle(color: Colors.grey),
+                            ),
                         ],
                       ),
                     ),

@@ -38,6 +38,10 @@ dependencies:
   animated_notch_bottom_bar: ^1.0.3
   image_picker: ^1.2.0
   http: ^1.5.0
+  google_maps_flutter: ^2.13.1
+  geolocator: ^14.0.2
+  geocoding: ^4.0.0
+  flutter_launcher_icons: ^0.14.4
 
 
 
@@ -45,6 +49,12 @@ dev_dependencies:
   flutter_lints: ^5.0.0
   flutter_test:
     sdk: flutter
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/images/logo.png"
+  min_sdk_android: 21 # android min sdk min:16, default 21
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
