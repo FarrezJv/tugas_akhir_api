@@ -7,6 +7,7 @@ import 'package:tugas_akhir_api/model/get_user_model.dart';
 import 'package:tugas_akhir_api/model/list_batch_model.dart';
 import 'package:tugas_akhir_api/model/list_training_model.dart';
 import 'package:tugas_akhir_api/model/register_model.dart';
+import 'package:tugas_akhir_api/model/updateprofile.dart';
 import 'package:tugas_akhir_api/preference/preference.dart';
 
 class AuthenticationAPI {
@@ -134,23 +135,32 @@ class AuthenticationAPI {
     }
   }
 
-  static Future<GetUserModel> updateProfile({required String name}) async {
-    final url = Uri.parse(Endpoint.updateProfile);
+  static Future<UpdateProfileModel> updateProfile({
+    required File imageFile,
+  }) async {
+    final url = Uri.parse(Endpoint.updateProfile); // pastikan endpoint benar
     final token = await PreferenceHandler.getToken();
+
+    // ubah ke base64 seperti di updateProduct
+    final bytes = await imageFile.readAsBytes();
+    final base64Str =
+        "data:image/${imageFile.path.split('.').last};base64,${base64Encode(bytes)}";
+
     final response = await http.put(
       url,
-      body: {"name": name},
+      body: jsonEncode({"profile_photo": base64Str}),
       headers: {
+        "Content-Type": "application/json",
         "Accept": "application/json",
-        // "Content-Type": "application/json",
         "Authorization": "Bearer $token",
       },
     );
+
     if (response.statusCode == 200) {
-      return GetUserModel.fromJson(json.decode(response.body));
+      return UpdateProfileModel.fromJson(json.decode(response.body));
     } else {
       final error = json.decode(response.body);
-      throw Exception(error["message"] ?? "Register gagal");
+      throw Exception(error["message"] ?? "Failed to update profile photo");
     }
   }
 

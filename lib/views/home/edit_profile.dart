@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:tugas_akhir_api/api/register_user.dart';
 
 class EditProfileScreen extends StatefulWidget {
@@ -9,6 +12,7 @@ class EditProfileScreen extends StatefulWidget {
   });
   final String name;
   final String imageURL;
+
   @override
   State<EditProfileScreen> createState() => _EditProfileScreenState();
 }
@@ -19,6 +23,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   bool isLoading = false;
   String? profileImageUrl;
+  File? _selectedImage;
 
   @override
   void initState() {
@@ -26,33 +31,53 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _loadProfile();
   }
 
-  Future<void> _loadProfile() async {
-    setState(() {
-      _nameController.text = widget.name;
-      profileImageUrl = widget.imageURL;
-    });
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _selectedImage = File(pickedFile.path); // preview dulu
+      });
+    }
   }
 
   Future<void> _saveChanges() async {
     setState(() => isLoading = true);
     try {
+      // Update nama
       final updatedUser = await AuthenticationAPI.updateUser(
         name: _nameController.text,
       );
 
+      // Kalau ada foto baru, upload juga
+      if (_selectedImage != null) {
+        final updatedProfile = await AuthenticationAPI.updateProfile(
+          imageFile: _selectedImage!,
+        );
+        profileImageUrl = updatedProfile.profilePhoto; // simpan URL foto baru
+        _selectedImage = null;
+      }
+
       setState(() => isLoading = false);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Profile updated successfully")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Update Profile Berhasil")));
 
       Navigator.pop(context, updatedUser);
     } catch (e) {
       setState(() => isLoading = false);
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text("Failed to update profile: $e")));
+      ).showSnackBar(SnackBar(content: Text("Gagal Update Profile: $e")));
     }
+  }
+
+  Future<void> _loadProfile() async {
+    setState(() {
+      _nameController.text = widget.name;
+      profileImageUrl = widget.imageURL;
+    });
   }
 
   Widget _buildTextField(
@@ -121,7 +146,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
             const SizedBox(height: 20),
 
-            // ================= CARD FORM (CENTER) =================
+            // ================= CARD FORM =================
             Expanded(
               child: Center(
                 child: SingleChildScrollView(
@@ -149,14 +174,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             CircleAvatar(
                               radius: 50,
                               backgroundColor: Colors.grey.shade200,
-                              backgroundImage:
-                                  (profileImageUrl != null &&
-                                      profileImageUrl!.isNotEmpty)
-                                  ? NetworkImage(profileImageUrl!)
-                                  : null,
+                              backgroundImage: _selectedImage != null
+                                  ? FileImage(
+                                      _selectedImage!,
+                                    ) // preview foto baru
+                                  : (profileImageUrl != null &&
+                                                profileImageUrl!.isNotEmpty
+                                            ? NetworkImage(profileImageUrl!)
+                                            : null)
+                                        as ImageProvider?,
                               child:
-                                  (profileImageUrl == null ||
-                                      profileImageUrl!.isEmpty)
+                                  (_selectedImage == null &&
+                                      (profileImageUrl == null ||
+                                          profileImageUrl!.isEmpty))
                                   ? const Icon(
                                       Icons.person,
                                       size: 40,
@@ -177,14 +207,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                     size: 18,
                                     color: Colors.white,
                                   ),
-                                  onPressed: () {
-                                    // aksi ganti foto nanti di sini
-                                    // ScaffoldMessenger.of(context).showSnackBar(
-                                    //   const SnackBar(
-                                    //     content: Text("Ganti foto profil"),
-                                    //   ),
-                                    // );
-                                  },
+                                  onPressed: _pickImage,
                                 ),
                               ),
                             ),

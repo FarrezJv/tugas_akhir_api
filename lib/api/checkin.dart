@@ -2,9 +2,11 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:tugas_akhir_api/api/endpoint/endpoint.dart';
+import 'package:tugas_akhir_api/model/absen_stats.dart';
 import 'package:tugas_akhir_api/model/absen_today_model.dart';
 import 'package:tugas_akhir_api/model/checkout.dart';
 import 'package:tugas_akhir_api/model/chekin.dart';
+import 'package:tugas_akhir_api/model/history_absen.dart';
 import 'package:tugas_akhir_api/preference/preference.dart';
 
 class AbsenAPI {
@@ -120,6 +122,57 @@ class AbsenAPI {
       }
     } catch (e) {
       print("Error Get Absen Today: $e");
+      return null;
+    }
+  }
+
+  // Absen Stats
+  static Future<AbsenStatsModel?> getAbsenStats() async {
+    try {
+      final token = await PreferenceHandler.getToken();
+
+      final response = await http.get(
+        Uri.parse(
+          Endpoint.absenStats,
+        ), // pastikan endpoint ini sesuai di Postman
+        headers: {
+          "Accept": "application/json",
+          "Authorization": "Bearer $token",
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return AbsenStatsModel.fromJson(jsonDecode(response.body));
+      } else {
+        print("Get Absen Stats Failed: ${response.body}");
+        return null;
+      }
+    } catch (e) {
+      print("Error Get Absen Stats: $e");
+      return null;
+    }
+  }
+
+  static Future<HistoryAbsenModel?> getHistoryAbsen() async {
+    try {
+      final token = await PreferenceHandler.getToken();
+
+      final response = await http.get(
+        Uri.parse(Endpoint.historyAbsen), // pastikan endpoint sesuai API
+        headers: {
+          "Accept": "application/json",
+          "Authorization": "Bearer $token",
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return HistoryAbsenModel.fromJson(jsonDecode(response.body));
+      } else {
+        print("Get History Absen Failed: ${response.body}");
+        return null;
+      }
+    } catch (e) {
+      print("Error Get History Absen: $e");
       return null;
     }
   }

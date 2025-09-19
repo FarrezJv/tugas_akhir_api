@@ -6,12 +6,12 @@ import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:tugas_akhir_api/api/checkin.dart';
 import 'package:tugas_akhir_api/api/register_user.dart';
-import 'package:tugas_akhir_api/check.dart';
 import 'package:tugas_akhir_api/extension/navigator.dart';
 import 'package:tugas_akhir_api/model/absen_today_model.dart';
 import 'package:tugas_akhir_api/model/checkout.dart';
 import 'package:tugas_akhir_api/model/get_user_model.dart';
-import 'package:tugas_akhir_api/views/home/profil_detail.dart';
+import 'package:tugas_akhir_api/model/history_absen.dart';
+import 'package:tugas_akhir_api/views/home/check.dart';
 
 class HalamanPage extends StatefulWidget {
   static const id = "/Halaman";
@@ -29,24 +29,25 @@ class _HalamanPageState extends State<HalamanPage> {
   bool isLoading = true;
   String? errorMessage;
 
-  // === real-time clock ===
+  // real-time clock
   late String _currentTime;
   late String _currentDate;
   Timer? _timer;
+
+  late Future<HistoryAbsenModel?> _futureHistory;
+  bool _showAllHistory = false;
 
   @override
   void initState() {
     super.initState();
     _loadProfileData();
     _loadAbsenToday();
-
-    // set awal
     _updateTime();
-
-    // update setiap 1 detik
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       _updateTime();
     });
+
+    _futureHistory = AbsenAPI.getHistoryAbsen();
   }
 
   void _updateTime() {
@@ -119,6 +120,9 @@ class _HalamanPageState extends State<HalamanPage> {
 
       if (result != null) {
         await _loadAbsenToday();
+        setState(() {
+          _futureHistory = AbsenAPI.getHistoryAbsen();
+        });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Check-out berhasil: ${result.message}")),
         );
@@ -132,6 +136,51 @@ class _HalamanPageState extends State<HalamanPage> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text("Error: $e")));
+    }
+  }
+
+  Widget _buildCheckCard(String title, String? time, IconData icon) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF9FAFB),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey.shade300),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: Colors.grey.shade600, size: 20),
+            const SizedBox(height: 4),
+            Text(
+              title,
+              style: TextStyle(fontSize: 13, color: Colors.grey.shade700),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              time ?? "--:--",
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Color _statusColor(String? status) {
+    switch (status) {
+      case "Hadir":
+        return Colors.green.shade600;
+      case "Izin":
+        return Colors.orange.shade600;
+      case "Masuk":
+        return Colors.blue.shade600;
+      default:
+        return Colors.blue.shade600;
     }
   }
 
@@ -149,7 +198,7 @@ class _HalamanPageState extends State<HalamanPage> {
             : SingleChildScrollView(
                 child: Column(
                   children: [
-                    // ======================= HEADER ==========================
+                    // HEADER
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.symmetric(
@@ -185,9 +234,10 @@ class _HalamanPageState extends State<HalamanPage> {
                           const SizedBox(width: 16),
                           Expanded(
                             child: GestureDetector(
-                              onTap: () {
-                                context.push(ProfilDetail());
-                              },
+                              // onTap: () async {
+                              //   await context.push(const ProfilDetail());
+                              //   await _loadProfileData();
+                              // },
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -216,7 +266,7 @@ class _HalamanPageState extends State<HalamanPage> {
 
                     const SizedBox(height: 20),
 
-                    // ======================= LIVE ATTENDANCE ==========================
+                    // CARD ABSENSI
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: Container(
@@ -244,7 +294,7 @@ class _HalamanPageState extends State<HalamanPage> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              _currentTime, // jam real-time
+                              _currentTime,
                               style: const TextStyle(
                                 fontSize: 36,
                                 color: Color(0xFF3B82F6),
@@ -253,31 +303,37 @@ class _HalamanPageState extends State<HalamanPage> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              _currentDate, // tanggal real-time
+                              _currentDate,
                               style: const TextStyle(color: Colors.grey),
                             ),
                             const SizedBox(height: 16),
                             const Divider(),
                             const SizedBox(height: 16),
-                            const Text(
-                              "Jam Pelatihan",
-                              style: TextStyle(color: Colors.grey),
+
+                            Row(
+                              children: [
+                                _buildCheckCard(
+                                  "Check In",
+                                  absenToday?.data?.checkInTime,
+                                  Icons.login,
+                                ),
+                                const SizedBox(width: 16),
+                                _buildCheckCard(
+                                  "Check Out",
+                                  absenToday?.data?.checkOutTime,
+                                  Icons.logout,
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 4),
-                            const Text(
-                              "08:00 - 15:00",
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+
                             const SizedBox(height: 20),
+
                             Row(
                               children: [
                                 Expanded(
                                   child: ElevatedButton(
                                     onPressed: () {
-                                      context.push(AbsensiApp());
+                                      context.push(AbsensiPage());
                                     },
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: const Color(0xFF3B82F6),
@@ -328,7 +384,7 @@ class _HalamanPageState extends State<HalamanPage> {
 
                     const SizedBox(height: 30),
 
-                    // ======================= ATTENDANCE HISTORY ==========================
+                    // HISTORY
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 24),
                       child: Column(
@@ -343,7 +399,7 @@ class _HalamanPageState extends State<HalamanPage> {
                               ),
                               SizedBox(width: 8),
                               Text(
-                                "Riwayat Absensi Hari Ini",
+                                "Riwayat Absensi",
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
@@ -352,51 +408,191 @@ class _HalamanPageState extends State<HalamanPage> {
                             ],
                           ),
                           const SizedBox(height: 12),
-                          if (absenToday?.data != null)
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 10),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+
+                          FutureBuilder<HistoryAbsenModel?>(
+                            future: _futureHistory,
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return const Center(
+                                  child: CircularProgressIndicator(),
+                                );
+                              }
+
+                              if (snapshot.hasError) {
+                                return Text("Error: ${snapshot.error}");
+                              }
+
+                              final historyData = snapshot.data?.data ?? [];
+
+                              if (historyData.isEmpty) {
+                                return const Text(
+                                  "Belum ada riwayat absensi",
+                                  style: TextStyle(color: Colors.grey),
+                                );
+                              }
+
+                              final displayedData = _showAllHistory
+                                  ? historyData
+                                  : historyData.take(3).toList();
+
+                              return Column(
                                 children: [
-                                  Text(
-                                    DateFormat(
-                                      "EEE, dd MMM yyyy",
-                                      "id_ID",
-                                    ).format(absenToday!.data!.attendanceDate!),
-                                    style: const TextStyle(
-                                      color: Colors.black87,
-                                    ),
+                                  ListView.builder(
+                                    shrinkWrap: true,
+                                    physics:
+                                        const NeverScrollableScrollPhysics(),
+                                    itemCount: displayedData.length,
+                                    itemBuilder: (context, index) {
+                                      final item = displayedData[index];
+                                      return Container(
+                                        margin: const EdgeInsets.symmetric(
+                                          vertical: 6,
+                                        ),
+                                        padding: const EdgeInsets.all(14),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(
+                                            14,
+                                          ),
+                                          border: Border.all(
+                                            color: const Color(0xFF3B82F6),
+                                            width: 1,
+                                          ),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.black.withOpacity(
+                                                0.05,
+                                              ),
+                                              blurRadius: 4,
+                                              offset: const Offset(0, 2),
+                                            ),
+                                          ],
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            Container(
+                                              padding: const EdgeInsets.all(10),
+                                              decoration: BoxDecoration(
+                                                color: const Color(
+                                                  0xFF3B82F6,
+                                                ).withOpacity(0.1),
+                                                shape: BoxShape.circle,
+                                              ),
+                                              child: const Icon(
+                                                Icons.calendar_today,
+                                                size: 20,
+                                                color: Color(0xFF3B82F6),
+                                              ),
+                                            ),
+                                            const SizedBox(width: 14),
+
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    "Tanggal: ${item.attendanceDate?.toIso8601String().split("T")[0] ?? '-'}",
+                                                    style: const TextStyle(
+                                                      color: Colors.black87,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      fontSize: 15,
+                                                    ),
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                  ),
+                                                  const SizedBox(height: 6),
+                                                  Row(
+                                                    children: [
+                                                      const Icon(
+                                                        Icons.login,
+                                                        size: 16,
+                                                        color: Color(
+                                                          0xFF3B82F6,
+                                                        ),
+                                                      ),
+                                                      const SizedBox(width: 4),
+                                                      Text(
+                                                        item.checkInTime ?? "-",
+                                                        style: const TextStyle(
+                                                          color: Colors.black54,
+                                                        ),
+                                                      ),
+                                                      const SizedBox(width: 12),
+                                                      const Icon(
+                                                        Icons.logout,
+                                                        size: 16,
+                                                        color: Color(
+                                                          0xFFEF4444,
+                                                        ),
+                                                      ),
+                                                      const SizedBox(width: 4),
+                                                      Text(
+                                                        item.checkOutTime ??
+                                                            "-",
+                                                        style: const TextStyle(
+                                                          color: Colors.black54,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+
+                                            const SizedBox(width: 8),
+
+                                            Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 10,
+                                                    vertical: 6,
+                                                  ),
+                                              decoration: BoxDecoration(
+                                                color: _statusColor(
+                                                  item.status,
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
+                                              ),
+                                              child: Text(
+                                                item.status ?? "-",
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 12,
+                                                ),
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    },
                                   ),
-                                  Row(
-                                    children: [
-                                      const Icon(
-                                        Icons.access_time,
-                                        size: 16,
-                                        color: Colors.grey,
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        "${absenToday!.data!.checkInTime ?? '-'} - ${absenToday!.data!.checkOutTime ?? '-'}",
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.w500,
-                                          color:
-                                              absenToday!.data!.status ==
-                                                  "Terlambat"
-                                              ? Colors.red
-                                              : Colors.black87,
+
+                                  if (historyData.length > 3)
+                                    TextButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          _showAllHistory = !_showAllHistory;
+                                        });
+                                      },
+                                      child: Text(
+                                        _showAllHistory
+                                            ? "Sembunyikan"
+                                            : "Lihat Semua",
+                                        style: const TextStyle(
+                                          color: Colors.blue,
                                         ),
                                       ),
-                                    ],
-                                  ),
+                                    ),
                                 ],
-                              ),
-                            )
-                          else
-                            const Text(
-                              "Belum ada absensi hari ini",
-                              style: TextStyle(color: Colors.grey),
-                            ),
+                              );
+                            },
+                          ),
                         ],
                       ),
                     ),

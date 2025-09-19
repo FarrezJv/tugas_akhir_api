@@ -138,6 +138,7 @@ class _ProfilDetailState extends State<ProfilDetail> {
                 child: Column(
                   children: [
                     // ================= HEADER =================
+                    // ================= HEADER =================
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.symmetric(
@@ -151,92 +152,102 @@ class _ProfilDetailState extends State<ProfilDetail> {
                         ),
                       ),
                       child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          // Tombol Back
-                          IconButton(
-                            onPressed: () => Navigator.pop(context, userData),
-                            icon: const Icon(
-                              Icons.arrow_back,
-                              color: Colors.white,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-
-                          Stack(
-                            children: [
-                              CircleAvatar(
-                                radius: 30,
-                                backgroundColor: Colors.white,
-                                backgroundImage:
-                                    (user?.profilePhotoUrl != null &&
-                                        user!.profilePhotoUrl!.isNotEmpty)
-                                    ? NetworkImage(user.profilePhotoUrl!)
-                                    : null,
-                                child:
-                                    (user?.profilePhotoUrl == null ||
-                                        user!.profilePhotoUrl!.isEmpty)
-                                    ? const Icon(
-                                        Icons.person,
-                                        size: 30,
-                                        color: Colors.blue,
-                                      )
-                                    : null,
-                              ),
-                              Positioned(
-                                bottom: 0,
-                                right: 0,
-                                child: InkWell(
-                                  onTap: () async {
-                                    final updated = await context.push(
-                                      EditProfileScreen(
-                                        imageURL: user?.profilePhotoUrl ?? "",
-                                        name: user?.name ?? "",
-                                      ),
-                                    );
-                                    if (updated != null) {
-                                      await _loadProfileData();
-                                    }
-                                  },
-                                  child: Container(
-                                    padding: const EdgeInsets.all(4),
-                                    decoration: const BoxDecoration(
-                                      color: Colors.white,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: const Icon(
-                                      Icons.edit,
-                                      size: 16,
-                                      color: Colors.blue,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-
-                          const SizedBox(width: 16),
+                          // Avatar + Nama
                           Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                            child: Row(
                               children: [
-                                Text(
-                                  user?.name ?? "-",
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                Stack(
+                                  children: [
+                                    CircleAvatar(
+                                      radius: 30,
+                                      backgroundColor: Colors.white,
+                                      backgroundImage:
+                                          (user?.profilePhotoUrl != null &&
+                                              user!.profilePhotoUrl!.isNotEmpty)
+                                          ? NetworkImage(user.profilePhotoUrl!)
+                                          : null,
+                                      child:
+                                          (user?.profilePhotoUrl == null ||
+                                              user!.profilePhotoUrl!.isEmpty)
+                                          ? const Icon(
+                                              Icons.person,
+                                              size: 30,
+                                              color: Colors.blue,
+                                            )
+                                          : null,
+                                    ),
+                                    Positioned(
+                                      bottom: 0,
+                                      right: 0,
+                                      child: InkWell(
+                                        onTap: () async {
+                                          final updated = await context.push(
+                                            EditProfileScreen(
+                                              imageURL:
+                                                  user?.profilePhotoUrl ?? "",
+                                              name: user?.name ?? "",
+                                            ),
+                                          );
+                                          if (updated != null) {
+                                            await _loadProfileData();
+                                          }
+                                        },
+                                        child: Container(
+                                          padding: const EdgeInsets.all(4),
+                                          decoration: const BoxDecoration(
+                                            color: Colors.white,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: const Icon(
+                                            Icons.edit,
+                                            size: 16,
+                                            color: Colors.blue,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                Text(
-                                  user?.email ?? "-",
-                                  style: const TextStyle(
-                                    color: Colors.white70,
-                                    fontSize: 13,
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        user?.name ?? "-",
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      Text(
+                                        user?.email ?? "-",
+                                        style: const TextStyle(
+                                          color: Colors.white70,
+                                          fontSize: 13,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],
                             ),
                           ),
+
+                          // // 🔧 Icon Settings pojok kanan
+                          // IconButton(
+                          //   onPressed: () {
+                          //     // context.push(AllUserPage());
+                          //   },
+                          //   icon: const Icon(
+                          //     Icons.settings,
+                          //     color: Colors.white,
+                          //   ),
+                          // ),
                         ],
                       ),
                     ),

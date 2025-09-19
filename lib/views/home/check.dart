@@ -6,29 +6,6 @@ import 'package:intl/intl.dart';
 import 'package:tugas_akhir_api/api/checkin.dart';
 import 'package:tugas_akhir_api/model/chekin.dart'; // pastikan ada AbsenService + AbsenCheckIn
 
-void main() {
-  runApp(const AbsensiApp());
-}
-
-class AbsensiApp extends StatefulWidget {
-  const AbsensiApp({super.key});
-
-  @override
-  State<AbsensiApp> createState() => _AbsensiAppState();
-}
-
-class _AbsensiAppState extends State<AbsensiApp> {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Absensi',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(primarySwatch: Colors.blue, fontFamily: 'Roboto'),
-      home: const AbsensiPage(),
-    );
-  }
-}
-
 class AbsensiPage extends StatefulWidget {
   const AbsensiPage({super.key});
 
@@ -307,17 +284,17 @@ class _AbsensiPageState extends State<AbsensiPage> {
                     const SizedBox(height: 16),
 
                     /// Catatan
-                    TextField(
-                      controller: noteController,
-                      maxLines: 2,
-                      decoration: InputDecoration(
-                        labelText: "Catatan (opsional)",
-                        prefixIcon: const Icon(Icons.note_alt_outlined),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                    ),
+                    // TextField(
+                    //   controller: noteController,
+                    //   maxLines: 2,
+                    //   decoration: InputDecoration(
+                    //     labelText: "Catatan (opsional)",
+                    //     prefixIcon: const Icon(Icons.note_alt_outlined),
+                    //     border: OutlineInputBorder(
+                    //       borderRadius: BorderRadius.circular(12),
+                    //     ),
+                    //   ),
+                    // ),
                     const SizedBox(height: 20),
 
                     /// Tombol Absen

@@ -1,8 +1,9 @@
 import 'package:animated_notch_bottom_bar/animated_notch_bottom_bar/animated_notch_bottom_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:tugas_akhir_api/check.dart';
+import 'package:tugas_akhir_api/views/home/check.dart';
 import 'package:tugas_akhir_api/views/home/halaman_utama.dart';
-import 'package:tugas_akhir_api/views/home/test.dart';
+import 'package:tugas_akhir_api/views/home/profil_detail.dart';
+import 'package:tugas_akhir_api/views/home/statistik.dart';
 
 class BotnavPage extends StatefulWidget {
   const BotnavPage({super.key});
@@ -23,8 +24,9 @@ class _BotnavPageState extends State<BotnavPage> {
   /// Halaman yang dipanggil sesuai index
   static const List<Widget> _widgetOptions = <Widget>[
     HalamanPage(),
-    AbsensiApp(),
-    GoogleMapsScreen(),
+    AbsensiPage(),
+    AbsenStatsPage(),
+    ProfilDetail(),
   ];
 
   /// Item menu untuk bottom navigation
@@ -40,9 +42,14 @@ class _BotnavPageState extends State<BotnavPage> {
       itemLabel: 'Absensi',
     ),
     BottomBarItem(
-      inActiveItem: Icon(Icons.settings, color: Colors.grey),
-      activeItem: Icon(Icons.settings, color: Colors.blue),
-      itemLabel: 'Test',
+      inActiveItem: Icon(Icons.bar_chart, color: Colors.grey),
+      activeItem: Icon(Icons.bar_chart, color: Colors.blue),
+      itemLabel: 'Statistik',
+    ),
+    BottomBarItem(
+      inActiveItem: Icon(Icons.person, color: Colors.grey),
+      activeItem: Icon(Icons.person, color: Colors.blue),
+      itemLabel: 'Profil',
     ),
   ];
 
