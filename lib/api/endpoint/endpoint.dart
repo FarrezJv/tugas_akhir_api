@@ -19,4 +19,6 @@ class Endpoint {
   static const String absenStats = "$baseURL/absen/stats";
   static const String historyAbsen = "$baseURL/absen/history";
   static const String users = "$baseURL/users";
+  static const String requestOtp = "$baseURL/forgot-password";
+  static const String resetPassword = "$baseURL/reset-password";
 }

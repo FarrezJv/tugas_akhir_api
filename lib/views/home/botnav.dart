@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:tugas_akhir_api/views/home/check.dart';
 import 'package:tugas_akhir_api/views/home/halaman_utama.dart';
 import 'package:tugas_akhir_api/views/home/profil_detail.dart';
+import 'package:tugas_akhir_api/views/home/request_screen.dart';
 import 'package:tugas_akhir_api/views/home/statistik.dart';
 
 class BotnavPage extends StatefulWidget {
@@ -26,6 +27,7 @@ class _BotnavPageState extends State<BotnavPage> {
     HalamanPage(),
     AbsensiPage(),
     AbsenStatsPage(),
+    ForgotResetPasswordPage(),
     ProfilDetail(),
   ];
 
@@ -45,6 +47,11 @@ class _BotnavPageState extends State<BotnavPage> {
       inActiveItem: Icon(Icons.bar_chart, color: Colors.grey),
       activeItem: Icon(Icons.bar_chart, color: Colors.blue),
       itemLabel: 'Statistik',
+    ),
+    BottomBarItem(
+      inActiveItem: Icon(Icons.settings, color: Colors.grey),
+      activeItem: Icon(Icons.settings, color: Colors.blue),
+      itemLabel: 'Pengaturan',
     ),
     BottomBarItem(
       inActiveItem: Icon(Icons.person, color: Colors.grey),
