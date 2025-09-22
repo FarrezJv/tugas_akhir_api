@@ -34,7 +34,9 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passController = TextEditingController();
 
-  List<String> genderList = ["L", "P"];
+  /// Map untuk gender (display → value)
+  Map<String, String> genderMap = {"Laki-laki": "L", "Perempuan": "P"};
+
   List<batches> batchList = [];
   List<Datum> trainingList = [];
 
@@ -105,7 +107,7 @@ class _RegisterPageState extends State<RegisterPage> {
         name: name,
         email: email,
         password: pass,
-        jenisKelamin: selectedGender!,
+        jenisKelamin: selectedGender!, // ini tetap L atau P
         profilePhoto: File(pickedFile!.path),
         batchId: selectedBatch!.id!,
         trainingId: selectedTraining!.id!,
@@ -206,8 +208,15 @@ class _RegisterPageState extends State<RegisterPage> {
               /// Gender
               DropdownButtonFormField<String>(
                 value: selectedGender,
-                items: genderList
-                    .map((g) => DropdownMenuItem(value: g, child: Text(g)))
+                items: genderMap.entries
+                    .map(
+                      (entry) => DropdownMenuItem(
+                        value: entry.value, // L atau P
+                        child: Text(
+                          entry.key,
+                        ), // tampil "Laki-laki / Perempuan"
+                      ),
+                    )
                     .toList(),
                 onChanged: (val) => setState(() => selectedGender = val),
                 decoration: _inputDecoration("Pilih Jenis Kelamin"),

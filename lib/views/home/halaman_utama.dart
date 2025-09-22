@@ -385,6 +385,7 @@ class _HalamanPageState extends State<HalamanPage> {
                             // const SizedBox(height: 16),
 
                             // Tombol izin panjang 1 baris penuh
+                            // Tombol izin panjang 1 baris penuh
                             Padding(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 0,
@@ -392,8 +393,19 @@ class _HalamanPageState extends State<HalamanPage> {
                               child: SizedBox(
                                 width: double.infinity,
                                 child: ElevatedButton(
-                                  onPressed: () {
-                                    context.push(AjukanIzinPage());
+                                  onPressed: () async {
+                                    final result = await context.push(
+                                      const AjukanIzinPage(),
+                                    );
+
+                                    // kalau AjukanIzinPage mengembalikan true → reload history & absenToday
+                                    if (result == true) {
+                                      setState(() {
+                                        _futureHistory =
+                                            AbsenAPI.getHistoryAbsen();
+                                      });
+                                      await _loadAbsenToday();
+                                    }
                                   },
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: const Color(0xFF3B82F6),

@@ -112,7 +112,7 @@ class _AjukanIzinPageState extends State<AjukanIzinPage> {
                     children: [
                       // Tanggal
                       const Text(
-                        "Date",
+                        "Tanggal",
                         style: TextStyle(fontWeight: FontWeight.w600),
                       ),
                       const SizedBox(height: 8),
@@ -141,7 +141,7 @@ class _AjukanIzinPageState extends State<AjukanIzinPage> {
 
                       // Alasan
                       const Text(
-                        "Reason for leave",
+                        "Alazan Izin",
                         style: TextStyle(fontWeight: FontWeight.w600),
                       ),
                       const SizedBox(height: 8),
@@ -178,7 +178,7 @@ class _AjukanIzinPageState extends State<AjukanIzinPage> {
                                   color: Colors.white,
                                 )
                               : const Text(
-                                  "SUBMIT",
+                                  "KIRIM",
                                   style: TextStyle(
                                     fontSize: 16,
                                     letterSpacing: 1.2,
