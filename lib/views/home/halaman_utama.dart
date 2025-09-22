@@ -12,6 +12,7 @@ import 'package:tugas_akhir_api/model/checkout.dart';
 import 'package:tugas_akhir_api/model/get_user_model.dart';
 import 'package:tugas_akhir_api/model/history_absen.dart';
 import 'package:tugas_akhir_api/views/home/check.dart';
+import 'package:tugas_akhir_api/views/home/izin.dart';
 
 class HalamanPage extends StatefulWidget {
   static const id = "/Halaman";
@@ -376,6 +377,42 @@ class _HalamanPageState extends State<HalamanPage> {
                                   ),
                                 ),
                               ],
+                            ),
+
+                            const SizedBox(height: 16),
+
+                            // Tombol izin panjang 1 baris penuh
+                            // const SizedBox(height: 16),
+
+                            // Tombol izin panjang 1 baris penuh
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 0,
+                              ),
+                              child: SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    context.push(AjukanIzinPage());
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFF3B82F6),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 14,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                  ),
+                                  child: const Text(
+                                    "Izin",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ),
                             ),
                           ],
                         ),

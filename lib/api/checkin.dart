@@ -7,6 +7,7 @@ import 'package:tugas_akhir_api/model/absen_today_model.dart';
 import 'package:tugas_akhir_api/model/checkout.dart';
 import 'package:tugas_akhir_api/model/chekin.dart';
 import 'package:tugas_akhir_api/model/history_absen.dart';
+import 'package:tugas_akhir_api/model/izin.dart';
 import 'package:tugas_akhir_api/preference/preference.dart';
 
 class AbsenAPI {
@@ -174,6 +175,33 @@ class AbsenAPI {
     } catch (e) {
       print("Error Get History Absen: $e");
       return null;
+    }
+  }
+
+  static Future<AbsenIzinModel> izinAbsen({
+    required String date,
+    required String alasanIzin,
+  }) async {
+    final url = Uri.parse(Endpoint.izin);
+    final token = await PreferenceHandler.getToken();
+    final response = await http.post(
+      url,
+      body: jsonEncode({"date": date, "alasan_izin": alasanIzin}),
+      headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
+    );
+
+    print("STATUS: ${response.statusCode}");
+    print("BODY: ${response.body}");
+
+    if (response.statusCode == 200) {
+      return AbsenIzinModel.fromJson(json.decode(response.body));
+    } else {
+      final error = json.decode(response.body);
+      throw Exception(error["message"] ?? "Failed to Izin");
     }
   }
 }

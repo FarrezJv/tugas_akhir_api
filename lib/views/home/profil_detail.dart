@@ -5,6 +5,7 @@ import 'package:tugas_akhir_api/model/get_user_model.dart';
 import 'package:tugas_akhir_api/preference/preference.dart';
 import 'package:tugas_akhir_api/views/auth/login.dart';
 import 'package:tugas_akhir_api/views/home/edit_profile.dart';
+import 'package:tugas_akhir_api/views/home/request_screen.dart';
 
 class ProfilDetail extends StatefulWidget {
   const ProfilDetail({super.key});
@@ -238,16 +239,16 @@ class _ProfilDetailState extends State<ProfilDetail> {
                             ),
                           ),
 
-                          // // 🔧 Icon Settings pojok kanan
-                          // IconButton(
-                          //   onPressed: () {
-                          //     // context.push(AllUserPage());
-                          //   },
-                          //   icon: const Icon(
-                          //     Icons.settings,
-                          //     color: Colors.white,
-                          //   ),
-                          // ),
+                          // 🔧 Icon Settings pojok kanan
+                          IconButton(
+                            onPressed: () {
+                              context.push(ForgotResetPasswordPage());
+                            },
+                            icon: const Icon(
+                              Icons.settings,
+                              color: Colors.white,
+                            ),
+                          ),
                         ],
                       ),
                     ),

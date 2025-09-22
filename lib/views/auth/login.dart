@@ -5,6 +5,7 @@ import 'package:tugas_akhir_api/model/register_model.dart';
 import 'package:tugas_akhir_api/preference/preference.dart';
 import 'package:tugas_akhir_api/views/auth/register.dart';
 import 'package:tugas_akhir_api/views/home/botnav.dart';
+import 'package:tugas_akhir_api/views/home/request_screen.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -156,7 +157,9 @@ class _LoginPageState extends State<LoginPage> {
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    context.push(ForgotResetPasswordPage());
+                  },
                   child: const Text(
                     "Lupa Password?",
                     style: TextStyle(color: Colors.grey),

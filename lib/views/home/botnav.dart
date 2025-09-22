@@ -1,9 +1,7 @@
 import 'package:animated_notch_bottom_bar/animated_notch_bottom_bar/animated_notch_bottom_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:tugas_akhir_api/views/home/check.dart';
 import 'package:tugas_akhir_api/views/home/halaman_utama.dart';
 import 'package:tugas_akhir_api/views/home/profil_detail.dart';
-import 'package:tugas_akhir_api/views/home/request_screen.dart';
 import 'package:tugas_akhir_api/views/home/statistik.dart';
 
 class BotnavPage extends StatefulWidget {
@@ -25,10 +23,12 @@ class _BotnavPageState extends State<BotnavPage> {
   /// Halaman yang dipanggil sesuai index
   static const List<Widget> _widgetOptions = <Widget>[
     HalamanPage(),
-    AbsensiPage(),
+    // AbsensiPage(),
     AbsenStatsPage(),
-    ForgotResetPasswordPage(),
+    // ForgotResetPasswordPage(),
+    // AbsenTodayCard(),
     ProfilDetail(),
+    // StatistikTestPage(),
   ];
 
   /// Item menu untuk bottom navigation
@@ -38,26 +38,26 @@ class _BotnavPageState extends State<BotnavPage> {
       activeItem: Icon(Icons.home, color: Colors.blue),
       itemLabel: 'Home',
     ),
-    BottomBarItem(
-      inActiveItem: Icon(Icons.access_time, color: Colors.grey),
-      activeItem: Icon(Icons.access_time, color: Colors.blue),
-      itemLabel: 'Absensi',
-    ),
+    // BottomBarItem(
+    //   inActiveItem: Icon(Icons.access_time, color: Colors.grey),
+    //   activeItem: Icon(Icons.access_time, color: Colors.blue),
+    //   itemLabel: 'Absensi',
+    // ),
     BottomBarItem(
       inActiveItem: Icon(Icons.bar_chart, color: Colors.grey),
       activeItem: Icon(Icons.bar_chart, color: Colors.blue),
-      itemLabel: 'Statistik',
+      itemLabel: 'Rekap',
     ),
     BottomBarItem(
       inActiveItem: Icon(Icons.settings, color: Colors.grey),
       activeItem: Icon(Icons.settings, color: Colors.blue),
       itemLabel: 'Pengaturan',
     ),
-    BottomBarItem(
-      inActiveItem: Icon(Icons.person, color: Colors.grey),
-      activeItem: Icon(Icons.person, color: Colors.blue),
-      itemLabel: 'Profil',
-    ),
+    // BottomBarItem(
+    //   inActiveItem: Icon(Icons.person, color: Colors.grey),
+    //   activeItem: Icon(Icons.person, color: Colors.blue),
+    //   itemLabel: 'Profil',
+    // ),
   ];
 
   @override

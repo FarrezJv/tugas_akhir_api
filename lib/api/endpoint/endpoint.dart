@@ -21,4 +21,5 @@ class Endpoint {
   static const String users = "$baseURL/users";
   static const String requestOtp = "$baseURL/forgot-password";
   static const String resetPassword = "$baseURL/reset-password";
+  static const String izin = "$baseURL/izin";
 }
