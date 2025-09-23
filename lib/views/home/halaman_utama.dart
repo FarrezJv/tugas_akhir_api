@@ -30,7 +30,6 @@ class _HalamanPageState extends State<HalamanPage> {
   bool isLoading = true;
   String? errorMessage;
 
-  // real-time clock
   late String _currentTime;
   late String _currentDate;
   Timer? _timer;
@@ -47,7 +46,6 @@ class _HalamanPageState extends State<HalamanPage> {
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       _updateTime();
     });
-
     _futureHistory = AbsenAPI.getHistoryAbsen();
   }
 
@@ -234,31 +232,25 @@ class _HalamanPageState extends State<HalamanPage> {
                           ),
                           const SizedBox(width: 16),
                           Expanded(
-                            child: GestureDetector(
-                              // onTap: () async {
-                              //   await context.push(const ProfilDetail());
-                              //   await _loadProfileData();
-                              // },
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    user?.name ?? "-",
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  user?.name ?? "-",
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
                                   ),
-                                  Text(
-                                    "${user?.batchKe ?? "-"} • ${user?.trainingTitle ?? "-"}",
-                                    style: const TextStyle(
-                                      color: Colors.white70,
-                                      fontSize: 13,
-                                    ),
+                                ),
+                                Text(
+                                  "${user?.batchKe ?? "-"} • ${user?.trainingTitle ?? "-"}",
+                                  style: const TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 13,
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
                           ),
                         ],
@@ -333,8 +325,17 @@ class _HalamanPageState extends State<HalamanPage> {
                               children: [
                                 Expanded(
                                   child: ElevatedButton(
-                                    onPressed: () {
-                                      context.push(AbsensiPage());
+                                    onPressed: () async {
+                                      final result = await context.push(
+                                        AbsensiPage(),
+                                      );
+                                      if (result == true) {
+                                        await _loadAbsenToday();
+                                        setState(() {
+                                          _futureHistory =
+                                              AbsenAPI.getHistoryAbsen();
+                                        });
+                                      }
                                     },
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: const Color(0xFF3B82F6),
@@ -381,11 +382,6 @@ class _HalamanPageState extends State<HalamanPage> {
 
                             const SizedBox(height: 16),
 
-                            // Tombol izin panjang 1 baris penuh
-                            // const SizedBox(height: 16),
-
-                            // Tombol izin panjang 1 baris penuh
-                            // Tombol izin panjang 1 baris penuh
                             Padding(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 0,
@@ -398,7 +394,6 @@ class _HalamanPageState extends State<HalamanPage> {
                                       const AjukanIzinPage(),
                                     );
 
-                                    // kalau AjukanIzinPage mengembalikan true → reload history & absenToday
                                     if (result == true) {
                                       setState(() {
                                         _futureHistory =

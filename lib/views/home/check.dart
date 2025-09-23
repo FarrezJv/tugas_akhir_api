@@ -90,7 +90,6 @@ class _AbsensiPageState extends State<AbsensiPage> {
   /// === Function Absensi dari temenmu (sudah tested) ===
   Future<void> _absenCheckIn() async {
     try {
-      // Ambil lokasi saat ini
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       );
@@ -110,7 +109,6 @@ class _AbsensiPageState extends State<AbsensiPage> {
         locationName = place.locality ?? "Lokasi Tidak Diketahui";
       }
 
-      // Panggil API absen check-in
       CheckInModel? result = await AbsenAPI.checkInUser(
         checkInLat: position.latitude,
         checkInLng: position.longitude,
@@ -121,12 +119,13 @@ class _AbsensiPageState extends State<AbsensiPage> {
       if (!mounted) return;
 
       if (result != null && result.data != null) {
-        // ✅ Berhasil absen
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text("✅ ${result.message}")));
+
+        // ✅ Tutup halaman dengan return true biar HalamanPage reload data
+        Navigator.pop(context, true);
       } else {
-        // ❌ Sudah absen / gagal
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text("⚠️ ${result?.message ?? "Sudah absen hari ini"}"),

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:lottie/lottie.dart';
 import 'package:tugas_akhir_api/api/register_user.dart';
 import 'package:tugas_akhir_api/extension/navigator.dart';
 import 'package:tugas_akhir_api/model/list_batch_model.dart';
@@ -25,7 +26,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
   String? selectedGender;
   batches? selectedBatch;
-  Datum? selectedTraining; // dari ListTrainingModel
+  Datum? selectedTraining;
 
   final ImagePicker _picker = ImagePicker();
   XFile? pickedFile;
@@ -34,7 +35,6 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passController = TextEditingController();
 
-  /// Map untuk gender (display → value)
   Map<String, String> genderMap = {"Laki-laki": "L", "Perempuan": "P"};
 
   List<batches> batchList = [];
@@ -80,7 +80,6 @@ class _RegisterPageState extends State<RegisterPage> {
       ).showSnackBar(const SnackBar(content: Text("Semua field wajib diisi")));
       return;
     }
-    PreferenceHandler.saveToken(user?.data?.token.toString() ?? "");
 
     if (selectedGender == null ||
         selectedBatch == null ||
@@ -107,21 +106,68 @@ class _RegisterPageState extends State<RegisterPage> {
         name: name,
         email: email,
         password: pass,
-        jenisKelamin: selectedGender!, // ini tetap L atau P
+        jenisKelamin: selectedGender!,
         profilePhoto: File(pickedFile!.path),
         batchId: selectedBatch!.id!,
         trainingId: selectedTraining!.id!,
       );
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result.message ?? "Register berhasil")),
+      PreferenceHandler.saveToken(result.data?.token ?? "");
+      setState(() {
+        user = result;
+      });
+
+      // ✅ Dialog Lottie sukses
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => AlertDialog(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Lottie.asset(
+                "assets/lottie/Success.json",
+                width: 150,
+                height: 150,
+                repeat: false,
+                onLoaded: (composition) {
+                  Future.delayed(composition.duration, () {
+                    Navigator.of(context).pop();
+                    context.push(const LoginPage()); // pindah ke login
+                  });
+                },
+              ),
+              const SizedBox(height: 10),
+              Text(
+                result.message ?? "Register Berhasil!",
+                style: const TextStyle(fontSize: 16),
+              ),
+            ],
+          ),
+        ),
       );
-      context.push(const LoginPage());
     } catch (e) {
       setState(() => errorMessage = e.toString());
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("Gagal daftar: $errorMessage")));
+
+      // ❌ Dialog gagal dengan Lottie
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Lottie.asset(
+                "assets/lottie/Failed.json",
+                width: 150,
+                height: 150,
+                repeat: false,
+              ),
+              const SizedBox(height: 10),
+              Text("Gagal daftar: $errorMessage"),
+            ],
+          ),
+        ),
+      );
     } finally {
       setState(() => isLoading = false);
     }
@@ -148,7 +194,6 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               const SizedBox(height: 24),
 
-              /// Foto Profil
               pickedFile != null
                   ? CircleAvatar(
                       radius: 50,
@@ -174,21 +219,18 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               const SizedBox(height: 32),
 
-              /// Nama
               TextField(
                 controller: nameController,
                 decoration: _inputDecoration("Masukkan Nama"),
               ),
               const SizedBox(height: 16),
 
-              /// Email
               TextField(
                 controller: emailController,
                 decoration: _inputDecoration("Masukkan Email"),
               ),
               const SizedBox(height: 16),
 
-              /// Password
               TextField(
                 controller: passController,
                 obscureText: hidePassword,
@@ -205,16 +247,13 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               const SizedBox(height: 16),
 
-              /// Gender
               DropdownButtonFormField<String>(
                 value: selectedGender,
                 items: genderMap.entries
                     .map(
                       (entry) => DropdownMenuItem(
-                        value: entry.value, // L atau P
-                        child: Text(
-                          entry.key,
-                        ), // tampil "Laki-laki / Perempuan"
+                        value: entry.value,
+                        child: Text(entry.key),
                       ),
                     )
                     .toList(),
@@ -223,7 +262,6 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               const SizedBox(height: 16),
 
-              /// Batch (from API)
               DropdownButtonFormField<batches>(
                 value: selectedBatch,
                 items: batchList
@@ -239,7 +277,6 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               const SizedBox(height: 16),
 
-              /// Training (from API)
               DropdownButtonFormField<Datum>(
                 value: selectedTraining,
                 items: trainingList
@@ -247,7 +284,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       (t) => DropdownMenuItem(
                         value: t,
                         child: SizedBox(
-                          width: 220, // atur sesuai kebutuhan
+                          width: 220,
                           child: Text(
                             t.title ?? "Pelatihan ${t.id}",
                             overflow: TextOverflow.ellipsis,
@@ -260,10 +297,8 @@ class _RegisterPageState extends State<RegisterPage> {
                 onChanged: (val) => setState(() => selectedTraining = val),
                 decoration: _inputDecoration("Pilih Pelatihan"),
               ),
-
               const SizedBox(height: 32),
 
-              /// Tombol Daftar
               ElevatedButton(
                 onPressed: isLoading ? null : registerUser,
                 style: ElevatedButton.styleFrom(

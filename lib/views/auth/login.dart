@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import 'package:tugas_akhir_api/api/register_user.dart';
 import 'package:tugas_akhir_api/extension/navigator.dart';
 import 'package:tugas_akhir_api/model/register_model.dart';
@@ -18,7 +19,6 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   bool rememberMe = false;
-  bool isVisibility = false;
   bool _obscurePassword = true;
   bool isLoading = false;
 
@@ -32,50 +32,88 @@ class _LoginPageState extends State<LoginPage> {
     });
     final email = emailController.text.trim();
     final password = passwordController.text.trim();
-    // final name = nameController.text.trim();
+
     if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Email, Password, dan Nama tidak boleh kosong"),
-        ),
+        const SnackBar(content: Text("Email dan Password tidak boleh kosong")),
       );
-      isLoading = false;
-
+      setState(() {
+        isLoading = false;
+      });
       return;
     }
+
     try {
       final result = await AuthenticationAPI.loginUser(
         email: email,
         password: password,
-        // name: name,
       );
       setState(() {
         user = result;
       });
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Login berhasil")));
+
       PreferenceHandler.saveToken(user?.data?.token.toString() ?? "");
       final savedUserId = await PreferenceHandler.getUserId();
       print("Saved User Id: $savedUserId");
-      // Navigator.pushReplacementNamed(Dashboard1.id);
-      context.pushReplacement(BotnavPage());
-
       print(user?.toJson());
+
+      // ✅ Tampilkan dialog Lottie sukses
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => AlertDialog(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Lottie.asset(
+                "assets/lottie/Success.json",
+                width: 150,
+                height: 150,
+                repeat: false,
+                onLoaded: (composition) {
+                  Future.delayed(composition.duration, () {
+                    Navigator.of(context).pop(); // tutup dialog
+                    context.pushReplacement(BotnavPage()); // pindah ke home
+                  });
+                },
+              ),
+              const SizedBox(height: 10),
+              const Text("Login Berhasil!", style: TextStyle(fontSize: 16)),
+            ],
+          ),
+        ),
+      );
     } catch (e) {
       print(e);
       setState(() {
         errorMessage = e.toString();
       });
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(errorMessage.toString())));
+
+      // ❌ Dialog gagal dengan Lottie
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Lottie.asset(
+                "assets/lottie/Failed.json",
+                width: 150,
+                height: 150,
+                repeat: false,
+              ),
+              const SizedBox(height: 10),
+              Text("Login Gagal: $e"),
+            ],
+          ),
+        ),
+      );
     } finally {
-      setState(() {});
-      isLoading = false;
+      setState(() {
+        isLoading = false;
+      });
     }
   }
-  // bool _obscurePassword = true;
 
   @override
   Widget build(BuildContext context) {
@@ -176,16 +214,18 @@ class _LoginPageState extends State<LoginPage> {
                     loginUser();
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFF2F57E4),
+                    backgroundColor: const Color(0xFF2F57E4),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  child: const Text(
-                    "Log In",
-                    style: TextStyle(color: Colors.white, fontSize: 16),
-                  ),
+                  child: isLoading
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text(
+                          "Log In",
+                          style: TextStyle(color: Colors.white, fontSize: 16),
+                        ),
                 ),
               ),
               const SizedBox(height: 25),

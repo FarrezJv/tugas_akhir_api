@@ -80,8 +80,15 @@ class _ForgotResetPasswordPageState extends State<ForgotResetPasswordPage> {
       controller: controller,
       obscureText: obscure,
       decoration: InputDecoration(
-        prefixIcon: icon != null ? Icon(icon, color: Colors.blue) : null,
+        prefixIcon: icon != null
+            ? Icon(icon, color: const Color(0xFF2563EB))
+            : null,
         labelText: label,
+        hintText: label,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
         filled: true,
         fillColor: Colors.grey.shade50,
@@ -91,10 +98,14 @@ class _ForgotResetPasswordPageState extends State<ForgotResetPasswordPage> {
 
   Widget _buildStepIndicator() {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         _buildStepCircle(1, active: true),
-        _buildStepLine(),
+        Expanded(
+          child: Container(
+            height: 2,
+            color: _otpSent ? const Color(0xFF2563EB) : Colors.grey.shade300,
+          ),
+        ),
         _buildStepCircle(2, active: _otpSent),
       ],
     );
@@ -111,15 +122,6 @@ class _ForgotResetPasswordPageState extends State<ForgotResetPasswordPage> {
           fontWeight: FontWeight.bold,
         ),
       ),
-    );
-  }
-
-  Widget _buildStepLine() {
-    return Container(
-      width: 40,
-      height: 2,
-      color: Colors.grey.shade300,
-      margin: const EdgeInsets.symmetric(horizontal: 8),
     );
   }
 
@@ -156,6 +158,7 @@ class _ForgotResetPasswordPageState extends State<ForgotResetPasswordPage> {
     return ElevatedButton(
       onPressed: _loading ? null : onPressed,
       style: ElevatedButton.styleFrom(
+        minimumSize: const Size(double.infinity, 50),
         backgroundColor: const Color(0xFF2563EB),
         foregroundColor: Colors.white,
         padding: const EdgeInsets.symmetric(vertical: 16),
@@ -187,28 +190,39 @@ class _ForgotResetPasswordPageState extends State<ForgotResetPasswordPage> {
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 20, // disamakan dengan konten di bawah
-                  vertical: 20,
+                  horizontal: 20,
+                  vertical: 30,
                 ),
                 decoration: const BoxDecoration(
-                  color: Color(0xFF3B82F6),
+                  gradient: LinearGradient(
+                    colors: [Color(0xFF3B82F6), Color(0xFF2563EB)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
                   borderRadius: BorderRadius.vertical(
-                    bottom: Radius.circular(24),
+                    bottom: Radius.circular(32),
                   ),
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                    Icon(Icons.lock_reset, color: Colors.white, size: 32),
-                    SizedBox(width: 12),
-                    Text(
+                child: Column(
+                  children: [
+                    const Icon(Icons.lock_reset, color: Colors.white, size: 48),
+                    const SizedBox(height: 12),
+                    const Text(
                       "Reset Password",
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 20,
+                        fontSize: 24,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 0.5,
                       ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      _otpSent
+                          ? "Masukkan OTP dan password baru"
+                          : "Masukkan email untuk kirim OTP",
+                      style: const TextStyle(color: Colors.white70),
+                      textAlign: TextAlign.center,
                     ),
                   ],
                 ),
@@ -217,23 +231,31 @@ class _ForgotResetPasswordPageState extends State<ForgotResetPasswordPage> {
               const SizedBox(height: 28),
 
               // ===== STEP =====
-              _buildStepIndicator(),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 32),
+                child: _buildStepIndicator(),
+              ),
               const SizedBox(height: 20),
 
               // ===== CARD FORM =====
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 16,
+                ),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeOut,
                   width: double.infinity,
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(24),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
+                        color: Colors.black.withOpacity(0.08),
+                        blurRadius: 16,
+                        offset: const Offset(0, 6),
                       ),
                     ],
                   ),
