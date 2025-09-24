@@ -12,6 +12,7 @@ import 'package:tugas_akhir_api/model/checkout.dart';
 import 'package:tugas_akhir_api/model/get_user_model.dart';
 import 'package:tugas_akhir_api/model/history_absen.dart';
 import 'package:tugas_akhir_api/views/home/check.dart';
+import 'package:tugas_akhir_api/views/home/detail_riwayat.dart';
 import 'package:tugas_akhir_api/views/home/izin.dart';
 
 class HalamanPage extends StatefulWidget {
@@ -489,129 +490,150 @@ class _HalamanPageState extends State<HalamanPage> {
                                     itemCount: displayedData.length,
                                     itemBuilder: (context, index) {
                                       final item = displayedData[index];
-                                      return Container(
-                                        margin: const EdgeInsets.symmetric(
-                                          vertical: 6,
-                                        ),
-                                        padding: const EdgeInsets.all(14),
-                                        decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          borderRadius: BorderRadius.circular(
-                                            14,
+                                      return GestureDetector(
+                                        onTap: () {
+                                          context.push(
+                                            DetailAbsensiScreen(absen: item),
+                                          );
+                                        },
+                                        child: Container(
+                                          margin: const EdgeInsets.symmetric(
+                                            vertical: 6,
                                           ),
-                                          border: Border.all(
-                                            color: const Color(0xFF3B82F6),
-                                            width: 1,
+                                          padding: const EdgeInsets.all(14),
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius: BorderRadius.circular(
+                                              14,
+                                            ),
+                                            border: Border.all(
+                                              color: const Color(0xFF3B82F6),
+                                              width: 1,
+                                            ),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.black.withOpacity(
+                                                  0.05,
+                                                ),
+                                                blurRadius: 4,
+                                                offset: const Offset(0, 2),
+                                              ),
+                                            ],
                                           ),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Colors.black.withOpacity(
-                                                0.05,
+                                          child: Row(
+                                            children: [
+                                              Container(
+                                                padding: const EdgeInsets.all(
+                                                  10,
+                                                ),
+                                                decoration: BoxDecoration(
+                                                  color: const Color(
+                                                    0xFF3B82F6,
+                                                  ).withOpacity(0.1),
+                                                  shape: BoxShape.circle,
+                                                ),
+                                                child: const Icon(
+                                                  Icons.calendar_today,
+                                                  size: 20,
+                                                  color: Color(0xFF3B82F6),
+                                                ),
                                               ),
-                                              blurRadius: 4,
-                                              offset: const Offset(0, 2),
-                                            ),
-                                          ],
-                                        ),
-                                        child: Row(
-                                          children: [
-                                            Container(
-                                              padding: const EdgeInsets.all(10),
-                                              decoration: BoxDecoration(
-                                                color: const Color(
-                                                  0xFF3B82F6,
-                                                ).withOpacity(0.1),
-                                                shape: BoxShape.circle,
-                                              ),
-                                              child: const Icon(
-                                                Icons.calendar_today,
-                                                size: 20,
-                                                color: Color(0xFF3B82F6),
-                                              ),
-                                            ),
-                                            const SizedBox(width: 14),
+                                              const SizedBox(width: 14),
 
-                                            Expanded(
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    "Tanggal: ${item.attendanceDate?.toIso8601String().split("T")[0] ?? '-'}",
-                                                    style: const TextStyle(
-                                                      color: Colors.black87,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      fontSize: 15,
+                                              Expanded(
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      "Tanggal: ${item.attendanceDate?.toIso8601String().split("T")[0] ?? '-'}",
+                                                      style: const TextStyle(
+                                                        color: Colors.black87,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        fontSize: 15,
+                                                      ),
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
                                                     ),
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                  ),
-                                                  const SizedBox(height: 6),
-                                                  Row(
-                                                    children: [
-                                                      const Icon(
-                                                        Icons.login,
-                                                        size: 16,
-                                                        color: Color(
-                                                          0xFF3B82F6,
+                                                    const SizedBox(height: 6),
+                                                    Row(
+                                                      children: [
+                                                        const Icon(
+                                                          Icons.login,
+                                                          size: 16,
+                                                          color: Color(
+                                                            0xFF3B82F6,
+                                                          ),
                                                         ),
-                                                      ),
-                                                      const SizedBox(width: 4),
-                                                      Text(
-                                                        item.checkInTime ?? "-",
-                                                        style: const TextStyle(
-                                                          color: Colors.black54,
+                                                        const SizedBox(
+                                                          width: 4,
                                                         ),
-                                                      ),
-                                                      const SizedBox(width: 12),
-                                                      const Icon(
-                                                        Icons.logout,
-                                                        size: 16,
-                                                        color: Color(
-                                                          0xFFEF4444,
+                                                        Text(
+                                                          item.checkInTime ??
+                                                              "-",
+                                                          style:
+                                                              const TextStyle(
+                                                                color: Colors
+                                                                    .black54,
+                                                              ),
                                                         ),
-                                                      ),
-                                                      const SizedBox(width: 4),
-                                                      Text(
-                                                        item.checkOutTime ??
-                                                            "-",
-                                                        style: const TextStyle(
-                                                          color: Colors.black54,
+                                                        const SizedBox(
+                                                          width: 12,
                                                         ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-
-                                            const SizedBox(width: 8),
-
-                                            Container(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                    horizontal: 10,
-                                                    vertical: 6,
-                                                  ),
-                                              decoration: BoxDecoration(
-                                                color: _statusColor(
-                                                  item.status,
+                                                        const Icon(
+                                                          Icons.logout,
+                                                          size: 16,
+                                                          color: Color(
+                                                            0xFFEF4444,
+                                                          ),
+                                                        ),
+                                                        const SizedBox(
+                                                          width: 4,
+                                                        ),
+                                                        Text(
+                                                          item.checkOutTime ??
+                                                              "-",
+                                                          style:
+                                                              const TextStyle(
+                                                                color: Colors
+                                                                    .black54,
+                                                              ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ],
                                                 ),
-                                                borderRadius:
-                                                    BorderRadius.circular(12),
                                               ),
-                                              child: Text(
-                                                item.status ?? "-",
-                                                style: const TextStyle(
-                                                  color: Colors.white,
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 12,
+
+                                              const SizedBox(width: 8),
+
+                                              Container(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      horizontal: 10,
+                                                      vertical: 6,
+                                                    ),
+                                                decoration: BoxDecoration(
+                                                  color: _statusColor(
+                                                    item.status,
+                                                  ),
+                                                  borderRadius:
+                                                      BorderRadius.circular(12),
                                                 ),
-                                                overflow: TextOverflow.ellipsis,
+                                                child: Text(
+                                                  item.status ?? "-",
+                                                  style: const TextStyle(
+                                                    color: Colors.white,
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 12,
+                                                  ),
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
                                               ),
-                                            ),
-                                          ],
+                                            ],
+                                          ),
                                         ),
                                       );
                                     },
