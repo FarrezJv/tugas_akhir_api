@@ -49,9 +49,9 @@ class _BotnavPageState extends State<BotnavPage> {
       itemLabel: 'Rekap',
     ),
     BottomBarItem(
-      inActiveItem: Icon(Icons.settings, color: Colors.grey),
-      activeItem: Icon(Icons.settings, color: Colors.blue),
-      itemLabel: 'Pengaturan',
+      inActiveItem: Icon(Icons.person, color: Colors.grey),
+      activeItem: Icon(Icons.person, color: Colors.blue),
+      itemLabel: 'Profil',
     ),
     // BottomBarItem(
     //   inActiveItem: Icon(Icons.person, color: Colors.grey),
