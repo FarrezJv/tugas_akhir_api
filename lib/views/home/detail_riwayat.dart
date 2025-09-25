@@ -131,7 +131,7 @@ class DetailAbsensiScreen extends StatelessWidget {
                         Icons.location_on,
                         "Lokasi",
                         absen.checkInAddress ?? "-",
-                        color: Colors.redAccent,
+                        color: const Color(0xFF3B82F6),
                       ),
                       const SizedBox(height: 12),
 

@@ -1,8 +1,7 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
-import 'package:lottie/lottie.dart';
 import 'package:tugas_akhir_api/extension/navigator.dart';
 import 'package:tugas_akhir_api/preference/preference.dart';
-import 'package:tugas_akhir_api/utils/splash_screen.dart';
 import 'package:tugas_akhir_api/views/auth/login.dart';
 import 'package:tugas_akhir_api/views/home/botnav.dart';
 
@@ -40,21 +39,73 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        children: [
-          Expanded(
-            child: Container(
-              // width: double.infinity,
-              height: double.infinity,
-              color: Colors.white, // warna background splash
-              alignment: Alignment.center,
-              child: Lottie.asset(
-                AppImage.splashlogo,
-                fit: BoxFit.contain, // biar skalanya pas & gak kepotong
+      body: Container(
+        // Gradient dibuat netral di area tengah biar logo keliatan jelas
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Color(0xFF3B82F6), // biru utama (atas)
+              Color(
+                0xFFF9FBFF,
+              ), // putih kebiruan (tengah - buat logo stand out)
+              Color(0xFF1E40AF), // biru tua (bawah)
+            ],
+            stops: [0.0, 0.55, 1.0], // posisi transisi warna
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Logo dengan animasi
+            Expanded(
+              child: Center(
+                child: ZoomIn(
+                  duration: const Duration(milliseconds: 1200),
+                  child: FadeInDown(
+                    duration: const Duration(milliseconds: 1200),
+                    child: Image.asset(
+                      "assets/images/full_logo-removebg-preview.png",
+                      width: 200,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ),
               ),
             ),
-          ),
-        ],
+
+            // Credit (tagline dihapus)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 40),
+              child: FadeInUp(
+                duration: const Duration(milliseconds: 1500),
+                child: Column(
+                  children: const [
+                    Text(
+                      "Developed by Farrez Juan Verterry",
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 1.1,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      "© 2025 | All Rights Reserved",
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w400,
+                        color: Colors.black54,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
